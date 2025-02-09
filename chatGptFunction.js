@@ -16,14 +16,14 @@ export async function getResponseGpt(message) {
                         Ты — помощник, который анализирует сообщения и определяет:
                         1. Относится ли сообщение к товару.
                         2. Ключевые слова.
-                        3. Категорию товара из списка: Электроника, Одежда, Бытовая техника, Мебель, Книги, Спорттовары, Другое.
+                        3. Ты должен определить категорию товара по его тип пример: Одежда, Бытовая техника, Мебель, Книги, Спорттовары, Другое.
                         4. Если сообщение является отзывом о товаре, не сохраняй его.
                         
                         Формат ответа:
                         - Если сообщение связано с товаром: 
                           { 
                             "product_related": true, 
-                            "keywords": "ключ1, ключ2", 
+                            "keywords": ["ключ1", "ключ2"],
                             "category": "категория" 
                           }
                         - Если не связано: 
@@ -45,6 +45,15 @@ export async function getResponseGpt(message) {
             temperature: 0.5
         });
         const result = JSON.parse(response.choices[0].message.content)
+        //         // Преобразуем keywords в массив
+        // if (typeof result.keywords === "string") {
+        //     result.keywords = result.keywords
+        //         .split(",")
+        //         .map(k => k.trim().toLowerCase())
+        //         .filter(k => k.length > 0);
+        // } else if (!Array.isArray(result.keywords)) {
+        //     result.keywords = [];
+        // }
         return result
     }catch(err){
         console.log('Ошибка при запросе: ', err)

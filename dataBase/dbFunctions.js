@@ -1,227 +1,166 @@
 import { pool } from './dbConnect.js';
+// import { client } from "../whatsapp.js="; // Подключаем клиент WhatsApp
+import { getResponseGpt } from '../chatGptFunction.js';
 
-export async function checkHistoryDB(userId, grouopId) {
-    let client
-    try{
-        client = await pool.connect()
-        const result = await client.query(`SELECT 1 FROM history WHERE user_id = $1 AND`)
-    }catch(err){
-        console.log('Ошибка: при проверки:checkHistoryDB =>', err)
+// ✅ Сохранение пользователей и их групп в БД
+export async function saveUserData(userGroups) {
+    for (let [phone, groups] of Object.entries(userGroups)) {
+        const groupJson = JSON.stringify(groups);
+        // console.log(groupJson)
+        await pool.query(`
+            INSERT INTO contacts (phone_number, group_data)
+            VALUES ($1, $2::jsonb)
+            ON CONFLICT (phone_number) 
+            DO UPDATE SET group_data = (
+                SELECT jsonb_agg(DISTINCT elem) 
+                FROM jsonb_array_elements(contacts.group_data || EXCLUDED.group_data) AS elem
+            )
+        `, [phone, groupJson]);
     }
 }
 
-export async function checkUserInOtherGroups(userId, groupId) {
-    let client
-    try{
-        client = await pool.connect()
-        const result = await client.query('SELECT 1 FROM user_group WHERE user_id = $1 AND group_id != $2', [userId, groupId])
-        return result.rowCount > 0
-    } catch(err){
-        console.log('Ошибка: при проверки:checkUserInOtherGroups =>', err)
-        return false
-    }finally{
-        if(client) client.release()
-    }
-}
-
-
-export async function deleteUserIfNoGroups(userId) {
-    let client;
-    try {
-        client = await pool.connect();
-        // Проверим, есть ли у пользователя другие группы
-        const hasOtherGroups = await checkUserInOtherGroups(userId);
-        
-        if (!hasOtherGroups) {
-            // Если нет других групп, удалим пользователя
-            await client.query('DELETE FROM users WHERE id = $1', [userId]);
-            console.log(`Пользователь ${userId} был удален из базы данных`);
-        } else {
-            console.log(`Пользователь ${userId} все еще состоит в других группах`);
-        }
-    } catch (err) {
-        console.log('Ошибка: при проверки:deleteUserIfNoGroups =>', err)
-    } finally {
-        if (client) client.release();
-    }
-}
-
-
-export async function checkUserPhoneDB(number) {
-    let client
-    try{
-        client = await pool.connect()
-        const result = await client.query('SELECT 1 FROM users WHERE user_phone = $1', [number])
-        return result.rowCount > 0
-    }
-    catch(err){
-        console.log('Ошибка: при проверки:checkUserPhoneDB =>', err)
-        return false
-    }finally{
-        if(client) client.release()
-    }
-}
-
-export async function checkGroupDB(group) {
-    let client
-    try{
-        client = await pool.connect()
-        const result = await client.query('SELECT 1 FROM groups WHERE group_id = $1', [group])
-        return result.rowCount > 0
-    }
-    catch(err){
-        console.log('Ошибка: при проверки:checkGroupDB =>', err)
-        return false
-    }finally{
-        if(client) client.release()
-    }
-}
-
-export async function addUserDB(number) {
-    let client
-    try{
-        client = await pool.connect()
-        await client.query('INSERT INTO users(user_phone) VALUES($1)', [number])
-        console.log('Все ок')
-        return true
-    }catch(err){
-        console.log(`Ошибка брат: ${err}`)
-        return false
-    }finally{
-        if(client) client.release()
-    }
-    
-}
-
-export async function addHistoryDB(userId, groupId, messageContent, categoryName, keywords) {
-    let client
-    try{
-        client = await pool.connect()
-        client.query('INSERT INTO history(user_id ,group_id, message, category, keywords) VALUES($1, $2, $3, $4, $5)', [userId, groupId, messageContent, categoryName, keywords])
-        return true
-    }catch(err){
-        console.log(`Ошибка в функции addHistoryDB => ${err}`)
-        return false
-    }finally{
-        if(client) client.release()
-    }
-}
-
-export async function addGroupDB(group_id, group_name) {
-    let client
-    try{
-        client = await pool.connect()
-        client.query('INSERT INTO groups(group_id, group_name) VALUES($1, $2)', [group_id, group_name])
-        return true
-    }catch(err){
-        console.log(`Ошибка в функции addGroupDB => ${err}`)
-        return false
-    }finally{
-        if(client) client.release()
-    }
-}
-
-export async function addUserToGroupDB(userPhone, groupIdIn) {
-    let client;
-    try {
-        client = await pool.connect();
-
-        // Получаем ID пользователя
-        const userResult = await client.query('SELECT id FROM users WHERE user_phone = $1', [userPhone]);
-        if (userResult.rowCount === 0) {
-            console.log(`❌ Пользователь ${userPhone} не найден в базе`);
-            return false;
-        }
-        const userId = userResult.rows[0].id;
-
-        // Получаем ID группы
-        const groupResult = await client.query('SELECT id FROM groups WHERE group_id = $1', [groupIdIn]);
-        console.log(groupResult)
-        if (groupResult.rowCount === 0) {
-            console.log(`❌ Группа ${groupIdIn} не найдена в базе`);
-            return false;
-        }
-        const groupId = groupResult.rows[0].id;
-
-        // Проверяем, есть ли пользователь уже в группе
-        const checkResult = await client.query('SELECT 1 FROM user_group WHERE user_id = $1 AND group_id = $2', [userId, groupId]);
-        if (checkResult.rowCount > 0) {
-            console.log(`⚠️ Пользователь ${userPhone} уже состоит в группе ${groupIdIn}`);
-            return false;
-        }
-
-        // Добавляем пользователя в группу
-        await client.query('INSERT INTO user_group (user_id, group_id) VALUES ($1, $2)', [userId, groupId]);
-        console.log(`✅ Пользователь ${userPhone} добавлен в группу ${groupIdIn}`);
-
-        return true;
-    } catch (err) {
-        console.log(`Ошибка в функции addUserToGroupDB: ${err}`);
-        return false;
-    } finally {
-        if (client) client.release();
-    }
-}
-
-
-
-
-export async function delateUserDB(number) {
-    let client
-    try{
-        client = await pool.connect()
-        await client.query('DELETE FROM users WHERE user_phone = $1', [number])
-        console.log('Все удалил')
-    }
-    catch(err){console.log(`Ошибка следующего характера: ${err}`)}
-    finally{
-        if(client) client.release()
-    }
-}
-
+// ❌ Удаление группы у пользователя при выходе
 export async function removeUserFromGroup(userId, groupId) {
-    let client;
-    try {
-        client = await pool.connect();
+    const result = await pool.query('SELECT group_data FROM contacts WHERE phone_number = $1', [userId]);
 
-        // Получаем ID пользователя по номеру телефона
-        const userResult = await client.query('SELECT id FROM users WHERE user_phone = $1', [userPhone]);
-        if (userResult.rowCount === 0) {
-            console.log(`Ошибка: пользователь ${userPhone} не найден в базе`);
+    if (result.rows.length === 0) return; // Если пользователя нет в БД, ничего не делаем
+
+    let groups = JSON.parse(result.rows[0].group_data);
+    groups = groups.filter(group => group.id !== groupId); // Удаляем группу из массива
+
+    await pool.query(`
+        UPDATE contacts SET group_data = $1 WHERE phone_number = $2
+    `, [JSON.stringify(groups), userId]);
+}
+const ADMINISTRATOR_GROUP_IDENTIFIER = "120363376170798075@g.us"; // Идентификатор административной группы
+
+/**
+ * Функция поиска сообщений в таблице `history` по ключевым словам
+ * @param {string[]} keywords - Список ключевых слов
+ * @returns {Promise<string>} - Отформатированный текст найденных сообщений или сообщение об их отсутствии
+ */
+async function searchMessagesByKeywords(keywords) {
+    // Приводим ключевые слова к нижнему регистру для точного сравнения
+    const lowerCaseKeywords = keywords.map(singleKeyword => singleKeyword.toLowerCase());
+
+    // Выполняем SQL-запрос к базе данных
+    const { rows } = await pool.query(
+        `SELECT 
+            history.message_data, 
+            history.timestamp, 
+            contacts.group_data->0->>'user_name' AS user_name, 
+            group_element->>'name' AS group_name  -- Исправлено
+         FROM history 
+         JOIN contacts 
+            ON history.user_phone = contacts.phone_number 
+         JOIN jsonb_array_elements(contacts.group_data) AS group_element 
+            ON group_element->>'id' = history.group_id 
+         WHERE EXISTS (
+             SELECT 1 
+             FROM jsonb_array_elements_text(history.message_data->'keywords') AS keyword 
+             WHERE LOWER(keyword) = ANY($1)
+         )`,
+        [lowerCaseKeywords]
+    );
+
+    // Если сообщений не найдено, возвращаем соответствующее уведомление
+    if (rows.length === 0) {
+        return "❌ *Сообщения по этим ключевым словам не найдены.*";
+    }
+
+    // Формируем текст найденных сообщений
+    return rows.map(row => {
+        const { message_data, timestamp, user_name, group_name } = row;
+        const { text, keywords, category } = message_data;
+
+        return `📌 *Сообщение:* ${text}\n` +
+               `🔑 *Ключевые слова:* ${keywords.join(", ")}\n` +
+               `🏷 *Категория:* ${category}\n` +
+               `📅 *Время отправки:* ${new Date(timestamp).toLocaleString()}\n` +
+               `👤 *Отправитель:* ${user_name || "Неизвестный пользователь"}\n` +
+               `🏠 *Группа:* ${group_name}`;
+    }).join("\n\n➖➖➖➖➖➖➖➖➖\n\n"); // Разделитель между найденными сообщениями
+}
+
+/**
+ * Функция обработки входящего сообщения из группы
+ * @param {Object} message - Объект сообщения из WhatsApp
+ */
+export async function processGroupMessage(message) {
+    const userPhoneNumber = message.author; // Номер телефона отправителя
+    const groupIdentifier = message.from; // Идентификатор группы
+    const messageTextContent = message.body; // Текст сообщения
+
+    try {
+        // Проверяем, является ли сообщение командой поиска в административной группе
+        if (groupIdentifier === ADMINISTRATOR_GROUP_IDENTIFIER && messageTextContent.startsWith("/searchAllKey")) {
+            const extractedKeywords = messageTextContent.replace("/searchAllKey", "").trim().split(",").map(keyword => keyword.trim().toLowerCase());
+
+            if (extractedKeywords.length === 0) {
+                console.log("⚠️ Команда поиска отправлена без указания ключевых слов.");
+                return;
+            }
+
+            // Выполняем поиск сообщений по ключевым словам
+            const formattedSearchResults = await searchMessagesByKeywords(extractedKeywords);
+            message.reply(formattedSearchResults)
+            console.log(formattedSearchResults);
             return;
         }
-        const userId = userResult.rows[0].id;
 
-        // Удаляем пользователя из группы
-        await client.query('DELETE FROM user_group WHERE user_id = $1 AND group_id = $2', [userId, groupId]);
-        console.log(`Пользователь ${userPhone} (ID: ${userId}) удален из группы ${groupId}`);
-    } catch (err) {
-        console.log('Ошибка в removeUserFromGroup =>', err);
-    } finally {
-        if (client) client.release();
+        // Запрашиваем данные о пользователе из базы данных `contacts`
+        const { rows } = await pool.query(
+            `SELECT group_data FROM contacts WHERE phone_number = $1`,
+            [userPhoneNumber]
+        );
+
+        // Если пользователь не найден в базе данных, прерываем выполнение
+        if (rows.length === 0) {
+            console.log(`⚠️ Пользователь с номером телефона ${userPhoneNumber} отсутствует в базе данных.`);
+            return;
+        }
+
+        // Проверяем, состоит ли пользователь в группе, из которой пришло сообщение
+        const userGroupsData = rows[0].group_data || [];
+        const isUserInGroup = userGroupsData.some(group => group.id === groupIdentifier);
+
+        if (!isUserInGroup) {
+            console.log(`⚠️ Группа с идентификатором ${groupIdentifier} не найдена в списке групп пользователя ${userPhoneNumber}.`);
+            return;
+        }
+
+        // Выполняем анализ сообщения с помощью GPT
+        const messageAnalysisResult = await getResponseGpt(messageTextContent);
+
+        // Проверяем, является ли сообщение товарным
+        if (!messageAnalysisResult || !messageAnalysisResult.product_related) {
+            console.log("🛑 Сообщение не содержит информации о товаре и не будет сохранено.");
+            return;
+        }
+
+        // Извлекаем ключевые слова и категорию товара из анализа GPT
+        const { keywords, category } = messageAnalysisResult;
+
+        // Приводим ключевые слова к нижнему регистру
+        const lowerCaseKeywords = Array.isArray(keywords) ? keywords.map(keyword => keyword.toLowerCase()) : [];
+
+        // Формируем JSON-объект для хранения в базе данных
+        const messageDataJson = JSON.stringify({ 
+            text: messageTextContent, 
+            keywords: lowerCaseKeywords, 
+            category 
+        });
+
+        // Сохраняем обработанное сообщение в таблице `history`
+        await pool.query(
+            `INSERT INTO history (message_id, user_phone, group_id, message_data, timestamp)
+             VALUES ($1, $2, $3, $4::jsonb, NOW())
+             ON CONFLICT (message_id) DO NOTHING`,
+            [message.id.id, userPhoneNumber, groupIdentifier, messageDataJson]
+        );
+
+        console.log("✅ Сообщение успешно сохранено в таблице `history`.");
+    } catch (error) {
+        console.error("❌ Ошибка при обработке входящего сообщения:", error);
     }
 }
-
-
-// export async function delateUserDB(number) {
-    //     try{
-        //         await client.query('DELETE FROM users WHERE id = $1', [number])
-        //         console.log('Все удалил')
-        //     }
-        //     catch(err){console.log(`Ошибка следующего характера: ${err}`)}
-        // }
-        
-        
-        // export async function removeUserFromGroup(userId, groupId) {
-        //     let client;
-        //     try {
-        //         client = await pool.connect();
-        //         await client.query('DELETE FROM user_group WHERE user_id = $1 AND group_id = $2', [userId, groupId]);
-        //         console.log(`Пользователь ${userId} удален из группы ${groupId}`);
-        //     } catch (err) {
-        //         console.log('Ошибка: при проверки:removeUserFromGroup =>', err)
-                
-        //     } finally {
-        //         if (client) client.release();
-        //     }
-        // }
