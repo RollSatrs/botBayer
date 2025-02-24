@@ -45,21 +45,22 @@ async function searchMessagesByKeywords(keywords) {
 
     // Выполняем SQL-запрос к базе данных
     const { rows } = await pool.query(
-        `SELECT 
+        `
+        SELECT 
+            history.user_phone, -- ✅ Добавлено
             history.message_data, 
             history.timestamp, 
-            contacts.group_data->0->>'user_name' AS user_name, 
-            group_element->>'name' AS group_name  -- Исправлено
-         FROM history 
-         JOIN contacts 
-            ON history.user_phone = contacts.phone_number 
-         JOIN jsonb_array_elements(contacts.group_data) AS group_element 
-            ON group_element->>'id' = history.group_id 
-         WHERE EXISTS (
-             SELECT 1 
-             FROM jsonb_array_elements_text(history.message_data->'keywords') AS keyword 
-             WHERE LOWER(keyword) = ANY($1)
-         )`,
+            group_element->>'name' AS group_name  
+        FROM history 
+        JOIN contacts 
+        ON history.user_phone = contacts.phone_number 
+        JOIN jsonb_array_elements(contacts.group_data) AS group_element 
+        ON group_element->>'id' = history.group_id 
+        WHERE EXISTS (
+            SELECT 1 
+            FROM jsonb_array_elements_text(history.message_data->'keywords') AS keyword 
+            WHERE LOWER(keyword) = ANY($1)
+        )`,
         [lowerCaseKeywords]
     );
 
@@ -67,17 +68,18 @@ async function searchMessagesByKeywords(keywords) {
     if (rows.length === 0) {
         return "❌ *Сообщения по этим ключевым словам не найдены.*";
     }
-
+    console.log(rows[0])
     // Формируем текст найденных сообщений
     return rows.map(row => {
-        const { message_data, timestamp, user_name, group_name } = row;
+        const { message_data, timestamp, user_phone, group_name } = row;
+        console.log(user_phone)
         const { text, keywords, category } = message_data;
 
         return `📌 *Сообщение:* ${text}\n` +
                `🔑 *Ключевые слова:* ${keywords.join(", ")}\n` +
                `🏷 *Категория:* ${category}\n` +
                `📅 *Время отправки:* ${new Date(timestamp).toLocaleString()}\n` +
-               `👤 *Отправитель:* ${user_name || "Неизвестный пользователь"}\n` +
+               `👤 *Отправитель:* ${user_phone.split("@")[0] || "Неизвестный пользователь"}\n` +
                `🏠 *Группа:* ${group_name}`;
     }).join("\n\n➖➖➖➖➖➖➖➖➖\n\n"); // Разделитель между найденными сообщениями
 }
@@ -163,4 +165,8 @@ export async function processGroupMessage(message) {
     } catch (error) {
         console.error("❌ Ошибка при обработке входящего сообщения:", error);
     }
+}
+
+export async function addUser(params) {
+    
 }

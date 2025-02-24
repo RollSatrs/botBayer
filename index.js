@@ -29,6 +29,7 @@ client.on('ready', async () => {
 // 📩 Обработка сообщений
 client.on('message', async (message) => {
     const chat = await message.getChat();
+    console.log('ewewe')
     if (chat.isGroup) {
         await processGroupMessage(message);
         // message.reply(answer)

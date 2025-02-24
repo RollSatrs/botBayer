@@ -45,15 +45,7 @@ export async function getResponseGpt(message) {
             temperature: 0.5
         });
         const result = JSON.parse(response.choices[0].message.content)
-        //         // Преобразуем keywords в массив
-        // if (typeof result.keywords === "string") {
-        //     result.keywords = result.keywords
-        //         .split(",")
-        //         .map(k => k.trim().toLowerCase())
-        //         .filter(k => k.length > 0);
-        // } else if (!Array.isArray(result.keywords)) {
-        //     result.keywords = [];
-        // }
+
         return result
     }catch(err){
         console.log('Ошибка при запросе: ', err)
