@@ -167,6 +167,22 @@ export async function processGroupMessage(message) {
     }
 }
 
-export async function addUser(params) {
-    
+export async function addUser(phone, password) {
+    try{
+        const result = await pool.query(
+            `INSERT INTO adminUsers(phone, password)
+             VALUES($1, $2)`,[phone, password]
+        )
+        // console.log(result)
+        return [result, false]
+        
+    }catch(err){
+        console.log(err)
+        return false
+    }
+}
+
+export async function findUser(phone) {
+    const result = pool.query(`SELECT * FROM adminUsers WHERE phone = $1`, [phone])
+    return (await result).rows[0]   
 }

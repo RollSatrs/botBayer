@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/auth/main.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
     <div class="wrapper">
-        <form action="/sign/login" method="post">
+        <form action="/auth/login" method="post">
             <h1>Login</h1>
-            <div class="input-box">
-                <input type="text" name="username" placeholder="Введите логин" required>
-                <i class='bx bx-user'></i>
-            </div>
             <div class="input-box">
                 <input type="tel" name="phone" placeholder="Введите номер телефона" required>
                 <i class='bx bx-phone'></i>
@@ -29,7 +25,7 @@
             </div>
             <button type="submit" class="btn">Login</button>
             <div class="register-link">
-                <p>Если у вас нет аккунта? <a href="#">Регистрация</a></p>
+                <p>Если у вас нет аккунта? <a href="/reg">Регистрация</a></p>
             </div>
         </form>
     </div>
