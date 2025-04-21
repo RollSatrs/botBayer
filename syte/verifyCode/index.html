@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> <!-- Устанавливаем кодировку страницы -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Адаптивный дизайн для мобильных устройств -->
+    <title>Верификация</title> <!-- Заголовок страницы -->
+    <link rel="stylesheet" href="/verifyCode/main.css"> <!-- Подключение файла стилей -->
+    <script src="/verifyCode/script.js" defer></script> <!-- Подключение JavaScript с атрибутом defer -->
+</head>
+<body>
+    <div class="wrapper"> <!-- Основной контейнер -->
+        <h1>Верификация</h1> <!-- Заголовок страницы -->
+        <p>Введите 6-значный код, отправленный на ваш номер телефона</p> <!-- Описание действия -->
+
+        <!-- Форма для ввода кода -->
+        <form id="code">
+            <div class="input-code"> <!-- Контейнер для полей ввода -->
+                <!-- Поля ввода для кода (по одному символу в каждом) -->
+                <input type="text" maxlength="1" required> <!-- Поле ввода с ограничением на 1 символ -->
+                <input type="text" maxlength="1" required>
+                <input type="text" maxlength="1" required>
+                <input type="text" maxlength="1" required>
+                <input type="text" maxlength="1" required>
+                <input type="text" maxlength="1" required>
+            </div>
+            <button type="submit" class="btn">Отправить</button> <!-- Кнопка отправки формы -->
+        </form>
+
+        <!-- Ссылка для повторной отправки кода -->
+        <div class="reset-link">
+            <p>Не получили код? <a href="/reset">Отправить снова</a></p> <!-- Ссылка для повторной отправки -->
+        </div>
+    </div>
+</body>
+</html>

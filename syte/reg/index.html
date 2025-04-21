@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> <!-- Устанавливаем кодировку страницы -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Адаптивный дизайн для мобильных устройств -->
+    <title>Registration</title> <!-- Заголовок страницы -->
+    <link rel="stylesheet" href="/reg/main.css"> <!-- Подключение файла стилей -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> <!-- Подключение иконок Boxicons -->
+    <script src="script.js" defer></script> <!-- Подключение JavaScript с атрибутом defer -->
+</head>
+<body>
+    <div class="wrapper"> <!-- Основной контейнер -->
+        <!-- Форма регистрации -->
+        <form id="register-form">
+            <h1>Registration</h1> <!-- Заголовок формы -->
+
+            <!-- Поле ввода телефона -->
+            <div class="input-box">
+                <input type="tel" name="phone" placeholder="Введите номер телефона" required> <!-- Поле для ввода телефона -->
+                <i class='bx bx-phone'></i> <!-- Иконка телефона -->
+            </div>
+
+            <!-- Поле ввода пароля -->
+            <div class="input-box">
+                <input type="password" name="password" placeholder="Введите пароль" required> <!-- Поле для ввода пароля -->
+                <i class='bx bx-lock-alt'></i> <!-- Иконка замка -->
+            </div>
+
+            <!-- Поле подтверждения пароля -->
+            <div class="input-box">
+                <input type="password" name="confirm_password" placeholder="Подтвердите пароль" required> <!-- Поле для подтверждения пароля -->
+                <i class='bx bx-lock-alt'></i> <!-- Иконка замка -->
+                <!-- Сообщение об ошибке, если пароли не совпадают -->
+                <span class="error-message" style="display: none; color: rgb(255, 165, 165); font-size: 16px;">Пароли не совпадают!</span>
+                <!-- Сообщение для пользователя, если он уже зарегистрирован -->
+                <span class="user-message" style="display: none; color: rgb(255, 165, 165); font-size: 16px;">Вы уже зарегистрированы</span>
+            </div>
+
+            <!-- Блок с чекбоксом "Запомни меня" и ссылкой "Забыл пароль" -->
+            <div class="remember">
+                <label for=""><input type="checkbox">Запомни меня</label> <!-- Чекбокс для запоминания пользователя -->
+                <a href="/forget">Забыл пароль</a> <!-- Ссылка для восстановления пароля -->
+            </div>
+
+            <!-- Кнопка отправки формы -->
+            <button type="submit" class="btn">Registration</button>
+
+            <!-- Ссылка для перехода на страницу логина -->
+            <div class="register-link">
+                <p>У меня есть аккаунт <a href="/auth">Логин</a></p> <!-- Ссылка на страницу авторизации -->
+            </div>
+        </form>
+    </div>
+</body>
+</html>

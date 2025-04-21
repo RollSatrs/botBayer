@@ -1,0 +1,134 @@
+:root {
+    --primary: #3B71CA;
+    --success: #14A44D;
+    --danger: #DC4C64;
+    --warning: #E4A11B;
+    --dark: #262D34;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F8F9FA;
+    color: var(--dark);
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: linear-gradient(135deg, var(--primary), #2C5F9B);
+    color: white;
+    height: 100vh;
+    width: 280px;
+    position: fixed;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.sidebar-brand {
+    padding: 20px;
+    font-size: 24px;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-menu a {
+    color: white;
+    padding: 15px 20px;
+    display: block;
+    transition: all 0.3s;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+
+.sidebar-menu a:hover {
+    background: rgba(255,255,255,0.1);
+    text-decoration: none;
+}
+
+.sidebar-menu a.active {
+    background: rgba(255,255,255,0.2);
+    font-weight: 600;
+}
+
+.main-content {
+    margin-left: 280px;
+    padding: 30px;
+    transition: all 0.3s;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #2C5F9B;
+}
+
+.keyword-tag {
+    background-color: var(--primary);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    margin: 5px;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.keyword-tag:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+.group-item {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    transition: box-shadow 0.3s;
+}
+
+.group-item:hover {
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.message-table {
+    background-color: white;
+    border-radius: 10px;
+}
+
+.message-table th {
+    background-color: #F8F9FA;
+    border: none;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        width: 60px;
+    }
+    
+    .main-content {
+        margin-left: 60px;
+    }
+    
+    .sidebar-brand,
+    .sidebar-menu span {
+        display: none;
+    }
+}

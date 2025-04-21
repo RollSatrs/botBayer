@@ -1,0 +1,106 @@
+/* Импорт шрифта Poppins из Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* Сброс отступов и настройка базового шрифта */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", serif; /* Используем шрифт Poppins */
+}
+
+/* Стили для тела страницы */
+body {
+    display: flex; /* Центрирование содержимого */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Высота экрана */
+    background: url(./img/ulitsa-doma-maiami-florida-ssha-ocean-drive.jpg) no-repeat; /* Фоновое изображение */
+    background-size: cover; /* Растягиваем изображение на весь экран */
+    color: white; /* Белый цвет текста */
+}
+
+/* Стили для обёртки контента */
+.wrapper {
+    width: 500px; /* Ширина блока */
+    border: 2px solid rgb(255, 255, 255, .2); /* Полупрозрачная белая рамка */
+    backdrop-filter: blur(20px); /* Размытие фона */
+    border-radius: 15px; /* Скруглённые углы */
+    padding: 30px 40px; /* Внутренние отступы */
+    text-align: center; /* Центрирование текста */
+}
+
+/* Заголовок внутри обёртки */
+.wrapper h1 {
+    margin-bottom: 30px; /* Отступ снизу */
+    font-size: 45px; /* Размер шрифта */
+}
+
+/* Параграф внутри обёртки */
+.wrapper p {
+    font-size: 20px; /* Размер шрифта */
+}
+
+/* Стили для блока ввода кода */
+.wrapper .input-code {
+    display: flex; /* Расположение полей ввода в строку */
+    justify-content: center; /* Центрирование полей */
+    gap: 7px; /* Расстояние между полями */
+    margin: 30px 0; /* Отступы сверху и снизу */
+}
+
+/* Стили для полей ввода */
+.wrapper .input-code input {
+    width: 45px; /* Ширина поля */
+    height: 45px; /* Высота поля */
+    border-radius: 5px; /* Скруглённые углы */
+    border: none; /* Убираем стандартную рамку */
+    background: transparent; /* Прозрачный фон */
+    outline: none; /* Убираем обводку при фокусе */
+    border: 2px solid rgb(255, 255, 255, .2); /* Полупрозрачная белая рамка */
+    color: white; /* Белый цвет текста */
+    font-size: 25px; /* Размер шрифта */
+    text-align: center; /* Центрирование текста */
+}
+
+/* Стили для поля ввода при фокусе */
+.wrapper .input-code input:focus {
+    border-color: white; /* Белая рамка при фокусе */
+}
+
+/* Стили для кнопки */
+.wrapper .btn {
+    width: 80%; /* Ширина кнопки */
+    height: 45px; /* Высота кнопки */
+    border-radius: 40px; /* Скруглённые углы */
+    border: none; /* Убираем стандартную рамку */
+    outline: none; /* Убираем обводку */
+    box-shadow: 0 0 10px rgba(25, 25, 25, 0.1); /* Тень */
+    cursor: pointer; /* Указатель мыши при наведении */
+    font-size: 20px; /* Размер шрифта */
+    background: white; /* Белый фон */
+    font-weight: 600; /* Жирный шрифт */
+    transition: transform 0.3s ease; /* Анимация при наведении */
+}
+
+/* Стили для кнопки при наведении */
+.wrapper .btn:hover {
+    transform: scale(0.9); /* Уменьшение размера кнопки */
+}
+
+/* Стили для ссылки "Сбросить код" */
+.wrapper .reset-link {
+    margin-top: 15px; /* Отступ сверху */
+}
+
+/* Стили для текста ссылки */
+.wrapper .reset-link a {
+    text-decoration: none; /* Убираем подчёркивание */
+    color: white; /* Белый цвет текста */
+    font-weight: 600; /* Жирный шрифт */
+}
+
+/* Стили для ссылки при наведении */
+.wrapper .reset-link a:hover {
+    text-decoration: underline; /* Подчёркивание при наведении */
+}
