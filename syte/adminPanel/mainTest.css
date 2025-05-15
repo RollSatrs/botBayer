@@ -185,3 +185,65 @@ body {
         margin-left: 60px;
     }
 }
+
+/* --- Адаптив для мобильных устройств --- */
+@media (max-width: 991px) {
+    .sidebar {
+        position: fixed;
+        left: -220px;
+        top: 0;
+        width: 220px;
+        height: 100%;
+        background: #222e3c;
+        z-index: 1050;
+        transition: left 0.3s;
+    }
+    .sidebar.show {
+        left: 0;
+    }
+    .main-content {
+        margin-left: 0 !important;
+        padding: 10px;
+    }
+    .navbar .input-group {
+        width: 100% !important;
+        margin-bottom: 10px;
+    }
+    .navbar .d-flex {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    .row > [class^="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    .card {
+        margin-bottom: 15px;
+    }
+    .sidebar.collapsed {
+        left: -220px;
+    }
+}
+
+@media (max-width: 575px) {
+    .sidebar {
+        width: 180px;
+    }
+    .sidebar.show {
+        left: 0;
+    }
+    .main-content {
+        padding: 5px;
+    }
+    .card-header h5, .card-header .d-flex {
+        font-size: 1rem;
+    }
+    .table th, .table td {
+        font-size: 0.85rem;
+        padding: 0.3rem;
+    }
+    .btn, .form-control, .form-select {
+        font-size: 0.9rem;
+        padding: 0.3rem 0.6rem;
+    }
+}

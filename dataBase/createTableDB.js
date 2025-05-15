@@ -1,63 +1,108 @@
-import { pool } from './dbConnect.js'; // Импорт пула соединений для работы с базой данных
+import { DataTypes } from 'sequelize';
+import { sequelize } from './dbConnect.js'; // Импорт пула соединений для работы с базой данных
 
-/**
- * Функция для создания таблиц в базе данных, если они ещё не существуют.
- */
+
+export const Group = sequelize.define('Group', {
+    group_id: {
+        type: DataTypes.STRING,
+        primaryKey: true
+    },
+    name: {
+        type: DataTypes.STRING, 
+        allowNull: false
+    },
+    member_count:{
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false
+    }
+},{
+    tableName: 'groups', 
+    timestamps: false
+})
+
+export const Contact = sequelize.define('Contact', {
+    phone_id:{
+        type: DataTypes.STRING,
+        primaryKey: true
+    },
+    phone_number:{
+        type:DataTypes.STRING,
+        unique: false
+    }
+},{
+    tableName: 'contact',
+    timestamps: false
+})
+
+export const UserGroup = sequelize.define('UserGroup', {
+    phone_id: {
+        type: DataTypes.STRING,
+        references: {model: Contact, key: 'phone_id'}
+    },
+    group_id: {
+        type: DataTypes.STRING,
+        references: {model: Group, key: 'group_id'}
+    }
+}, {
+    tableName: 'user_groups',
+    timestamps: false,
+    indexes: [
+        {
+            unique: true, fields: ['phone_id', 'group_id']
+        }
+    ]
+})
+
+export const Message = sequelize.define('Message',{
+    phone_id:{
+        type: DataTypes.STRING,
+        references: {model: Contact, key: 'phone_id'}
+    },
+    group_id:{
+        type: DataTypes.STRING,
+        references: {model: Group, key: 'group_id'}
+    },
+    text:{
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
+    timestamps:{
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    }
+},{
+    tableName: 'messages',
+    timestamps: false
+})
+
+export const AnalysisResult = sequelize.define('AnalysisResult',{
+    group_id: {
+        type: DataTypes.STRING,
+        references: {model: Group, key: 'group_id'},
+        allowNull: false
+    },
+    user_phone:{
+        type: DataTypes.STRING,
+        references: {model: Contact, key: 'phone_id'},
+        allowNull: false
+    },
+    keywords: {type: DataTypes.ARRAY(DataTypes.TEXT)},
+    categories: {type: DataTypes.ARRAY(DataTypes.TEXT)},
+    text:{type: DataTypes.ARRAY(DataTypes.TEXT)},
+    analyzed_at:{type: DataTypes.DATE, defaultValue: DataTypes.NOW}
+})
+
+// Настройка ассоциаций для корректной работы include
+AnalysisResult.belongsTo(Group, { foreignKey: 'group_id' });
+Group.hasMany(AnalysisResult, { foreignKey: 'group_id' });
+
 export async function createTables() {
     try {
-        // Создаём таблицу для хранения информации о группах
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS groups (
-                group_id TEXT PRIMARY KEY, -- Уникальный идентификатор группы
-                name TEXT NOT NULL, -- Название группы
-                member_count INTEGER DEFAULT 0 -- Количество участников группы
-            );
-        `);
-
-        // Создаём таблицу для хранения информации о контактах
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS contacts (
-                phone_id TEXT PRIMARY KEY, -- Уникальный идентификатор телефона
-                phone_number TEXT UNIQUE -- Уникальный номер телефона
-            );
-        `);
-
-        // Создаём таблицу для связи между пользователями и группами
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS user_groups (
-                id SERIAL PRIMARY KEY, -- Уникальный идентификатор записи
-                phone_id TEXT REFERENCES contacts(phone_id), -- Ссылка на пользователя
-                group_id TEXT REFERENCES groups(group_id), -- Ссылка на группу
-                UNIQUE(phone_id, group_id) -- Уникальная связь между пользователем и группой
-            );
-        `);
-
-        // Создаём таблицу для хранения сообщений
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS messages (
-                phone_id TEXT REFERENCES contacts(phone_id), -- Ссылка на пользователя
-                group_id TEXT REFERENCES groups(group_id), -- Ссылка на группу
-                text TEXT NOT NULL, -- Текст сообщения
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Временная метка сообщения
-            );
-        `);
-
-        // Создаём таблицу для хранения результатов анализа
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS analysis_results (
-                id SERIAL PRIMARY KEY, -- Уникальный идентификатор записи
-                group_id TEXT NOT NULL REFERENCES groups(group_id), -- Ссылка на группу
-                user_phone TEXT NOT NULL REFERENCES contacts(phone_id), -- Ссылка на пользователя
-                keywords TEXT[], -- Массив ключевых слов
-                categories TEXT[], -- Массив категорий
-                text TEXT[], -- Массив текстов сообщений
-                analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Временная метка анализа
-                UNIQUE (group_id, user_phone) -- Уникальная связь между группой и пользователем
-            );
-        `);
-
-        console.log('Таблицы успешно созданы или уже существуют.'); // Логируем успешное создание таблиц
+        await sequelize.sync();
+        console.log('Таблицы успешно созданы или уже существуют.');
     } catch (error) {
-        console.error('Ошибка при создании таблиц:', error.message); // Логируем ошибку при создании таблиц
+        console.error('Ошибка при создании таблиц:', error.message);
     }
 }
+

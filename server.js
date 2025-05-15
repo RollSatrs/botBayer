@@ -1,7 +1,7 @@
 import path from "path" // Модуль для работы с путями
 import { fileURLToPath } from 'url' // Модуль для работы с URL
 import express from 'express' // Фреймворк для создания сервера
-import { getGroupsData, getAnalyze, addUsers } from './dataBase/dbFunctions.js' // Импорт функций для работы с базой данных
+import { getGroupsData, getAnalyze, addUsers, getAllUsers } from './dataBase/dbFunctions.js' // Импорт функций для работы с базой данных
 import http from 'http' // Модуль для создания HTTP-сервера
 import { Server } from 'socket.io' // Библиотека для работы с WebSocket
 import crypto from 'crypto' // Модуль для работы с криптографией
@@ -15,11 +15,9 @@ const server = http.createServer(app) // Создание HTTP-сервера
 const SECRET_KEY = crypto.randomBytes(32).toString('hex') // Генерация секретного ключа
 
 // Настраиваем Socket.IO
-const io = new Server(server, {
+export const io = new Server(server, {
     cors: {
-        origin: process.env.NODE_ENV === 'production'
-            ? ["https://ваш-домен.com"] // Разрешённые домены в продакшене
-            : ["http://localhost:*"], // Разрешённые домены в разработке
+        origin: "*",
         methods: ["GET", "POST"] // Разрешённые методы
     },
     connectionStateRecovery: {
@@ -34,8 +32,7 @@ io.use((socket, next) => {
     next();
 });
 
-// Экспортируем объект io для использования в других файлах
-export { io };
+
 
 // Настраиваем статическую папку для сервера
 app.use(express.static(path.join(__dirname, 'syte')));
@@ -88,6 +85,7 @@ export function serverFunctions() {
                 return res.status(404).json({ error: 'Группы не найдены' });
             }
             res.json(groups);
+            console.log(groups)
         } catch (error) {
             console.error('Ошибка при обработке запроса:', error.message);
             res.status(500).json({ error: 'Внутренняя ошибка сервера' });

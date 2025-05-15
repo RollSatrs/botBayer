@@ -1,0 +1,6 @@
+2025/05/13-19:34:40.764 69a4 Reusing MANIFEST C:\Users\sarse\OneDrive\Desktop\My\FullProject\upgradeBayer\session\session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/05/13-19:34:40.772 69a4 Recovering log #29
+2025/05/13-19:34:40.775 69a4 Reusing old log C:\Users\sarse\OneDrive\Desktop\My\FullProject\upgradeBayer\session\session\Default\Local Storage\leveldb/000029.log 
+2025/05/14-01:20:07.298 9508 Level-0 table #33: started
+2025/05/14-01:20:07.304 9508 Level-0 table #33: 15017 bytes OK
+2025/05/14-01:20:07.305 9508 Delete type=0 #29

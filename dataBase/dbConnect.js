@@ -1,13 +1,18 @@
 import pkg from 'pg';
 import dotenv from 'dotenv';
+import { Sequelize } from 'sequelize';
 const { Pool } = pkg;
 
 dotenv.config()
 
-export const pool = new Pool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-})
+export const sequelize = new Sequelize(
+  process.env.DB_NAME,         // имя базы
+  process.env.DB_USER,         // пользователь
+  process.env.DB_PASSWORD,     // пароль
+  {
+    host: process.env.DB_HOST, // хост
+    port: process.env.DB_PORT,                 // порт
+    dialect: 'postgres',       // тип базы
+    logging: false,            // отключить логи
+  }
+);

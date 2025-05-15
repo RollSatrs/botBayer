@@ -1,19 +1,23 @@
-import fs from 'fs';
-import { extractFrames } from "./extractFunctions.js";
-import { name } from 'ejs';
 import path from "path";
 import { fileURLToPath } from 'url';
 import pkg from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import { serverFunctions } from './server.js';
 import { getResponseGpt, getResponseImg } from './chatGptFunction.js';
+import { io } from "./server.js";
+import { 
+    addGroups, addUserGruops, 
+    addUsers, addMessages, checkUserGroup, 
+    addAnalysis, deleteUsersWithGroup, 
+    dropTables, updateDataBase
+} from './dataBase/dbFunctions.js';
 import { createTables } from "./dataBase/createTableDB.js";
-import { addGroups, addUserGruops, addUsers, addMessages, checkUserGroup, addAnalysis, deleteUsersWithGroup } from './dataBase/dbFunctions.js';
-import { io } from './server.js';
+
 
 console.log('ВКЛ');
 
-// Получение текущего пути файла
+// Получение текущего пути 
+updateDataBase()
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -41,15 +45,14 @@ client.on('qr', (qr) => {
 // Событие готовности клиента
 client.on('ready', async () => {
     console.log('✅ Бот полностью готов!');
-    await createTables(); // Создание таблиц в базе данных
     await new Promise(resolve => setTimeout(resolve, 5000)); // Задержка для инициализации
 
     // Получение всех чатов и фильтрация групп
     const chats = await client.getChats();
     const groups = chats.filter(chat => chat.isGroup);
-
     // Обработка каждой группы
     for (let group of groups) {
+        const phones = []
         const participants = group.participants.map(participant => participant.id._serialized);
         const participantsLength = participants.length;
         const groupId = group.id._serialized;
@@ -60,9 +63,14 @@ client.on('ready', async () => {
 
         // Добавление участников группы в базу данных
         for (const participantId of participants) {
+            // console.log(participantId)
             const phone = await client.getFormattedNumber(participantId);
             await addUsers(participantId, phone);
             await addUserGruops(participantId, groupId);
+            // phones.push({id: participantId,phone})
+            // phones.sort((a, b) => {
+            //     return(b.phone.startsWith('7') || )
+            // })
         }
     }
 });
@@ -93,7 +101,7 @@ client.on('message', async (message) => {
             console.log('Сообщение НЕ связано с товаром.');
             return;
         }
-
+        console.log('Сообщение связано с товаром:', productRelated);
         // Если сообщение связано с товаром
         const keywords = analysisResult.keywords.map(kw => kw.keyword);
         const categories = analysisResult.keywords.map(kw => kw.category);
@@ -101,6 +109,7 @@ client.on('message', async (message) => {
         // Добавление сообщения и анализа в базу данных
         await addMessages(phone, groupId, text);
         await addAnalysis(groupId, phone, keywords, categories, text);
+        io.emit('analysis_updated', (groupId))
     }
 });
 
@@ -141,6 +150,7 @@ client.on('group_leave', async (notification) => {
 client.on('disconnected', async (reason) => {
     console.log('Бот отключен:', reason);
     await client.destroy(); // Завершение сессии
+
 });
 
 // Запуск серверных функций
