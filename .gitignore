@@ -1,4 +1,9 @@
 /.env
 /session
 /node_modules
-node_modules/
+/body-parser
+/express
+/finalhandler
+/send
+/@grpc
+/@google-cloud
