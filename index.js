@@ -28,7 +28,7 @@ const mixShop = '120363372643476883@g.us';
 const { Client, LocalAuth } = pkg;
 const client = new Client({
     authStrategy: new LocalAuth({
-        dataPath: './session' // Путь для хранения сессии
+        dataPath: 'D:/sessions' // Путь для хранения сессии
     }),
     puppeteer: {
         headless: true, // Запуск браузера в фоновом режиме
