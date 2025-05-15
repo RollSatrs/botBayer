@@ -7,3 +7,5 @@
 /send
 /@grpc
 /@google-cloud
+/package-lock.json
+/package.json
